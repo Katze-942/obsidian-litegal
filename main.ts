@@ -36,6 +36,10 @@ export default class LiteGallery extends Plugin {
 				.map((line) => line.replace(/!?\[\[/, "").replace("]]", "").trim())
 				.filter((line) => line)
 				.map((image) => {
+					// If image is a URL (http/https) or a local file path, return it as is
+					if (image.match(/^(http|https):\/\//)) {
+						return image
+					}
 					// Check if the image exists in any of the folders specified in settings and return the path if it does, otherwise return undefined
 					let image_exists = false
 					let image_path = undefined
@@ -58,7 +62,7 @@ export default class LiteGallery extends Plugin {
 					return image_path
 				}
 			).filter((image_path) => image_path !== undefined) as string[]
-
+			console.log(image_list)
 			// Create the lightbox container
 			const lightbox_container = document.body.createEl('div', {
 				cls: 'litegal-lightbox-container hidden'
@@ -97,7 +101,10 @@ export default class LiteGallery extends Plugin {
 					lightbox_container.removeClass('hidden')
 					lightbox_image.src = image_list[active_slide]
 				}
-
+				active_image.onerror = function() {
+					this.src='https://raw.githubusercontent.com/jpoles1/obsidian-litegal/eb0e30b2709a3081dd8d32ef4371367b95694881/404notfound.jpg'
+				}
+				
 				// Create the left arrow element and handle click event to navigate to the previous image
 				const larrow = active_image_container.createEl('div', {
 					text: '<',
@@ -162,13 +169,15 @@ export default class LiteGallery extends Plugin {
 						cls: 'litegal-preview-img'
 					})
 					preview_elem.src = image_path
+					preview_elem.onerror = function() {
+						this.src='https://raw.githubusercontent.com/jpoles1/obsidian-litegal/eb0e30b2709a3081dd8d32ef4371367b95694881/404notfound.jpg'
+					}
 					
 					// Handle click event to set the active slide and update the active image
 					preview_elem.onclick = () => {
 						active_slide = i
 						active_image.src = `${image_list[active_slide]}`
-					}
-					
+					}					
 					// Append the preview element to the preview container
 				})
 					
@@ -200,6 +209,10 @@ export default class LiteGallery extends Plugin {
 				const lightbox_image = lightbox.createEl('img', {
 					cls: 'litegal-lightbox-image',
 				})
+				lightbox_image.onerror = function() {
+					this.src='https://raw.githubusercontent.com/jpoles1/obsidian-litegal/eb0e30b2709a3081dd8d32ef4371367b95694881/404notfound.jpg'
+				}						
+
 
 				// Create the exit element for the lightbox and handle click event to close the lightbox
 				const lightbox_exit = lightbox.createEl('div', {
